@@ -1,11 +1,12 @@
 <script lang="ts" generics="I extends Annotation, E extends unknown">
+
   import { SvelteComponent, onMount } from 'svelte';
   import { v4 as uuidv4 } from 'uuid';
   import type { Annotation, DrawingStyleExpression, StoreChangeEvent, User } from '@annotorious/core';
   import { isImageAnnotation, ShapeType } from '../model';
   import type { ImageAnnotation, Shape} from '../model';
   import { getEditor as _getEditor, EditorMount } from './editors';
-  import { Ellipse, Polygon, Rectangle} from './shapes';
+  import { Ellipse, Line, Polygon, PolyLine, Rectangle, Freehand} from './shapes';
   import { getTool, listDrawingTools, ToolMount } from './tools';
   import { enableResponsive } from './utils';
   import { createSVGTransform } from './Transform';
@@ -168,6 +169,18 @@
               annotation={annotation} 
               geom={selector.geometry} 
               style={style} />
+          {:else if (selector?.type === ShapeType.LINE)}
+           <Line annotation={annotation} 
+              geom={selector.geometry} 
+              style={style}/>
+           {:else if (selector?.type === ShapeType.POLYLINE)}
+           <PolyLine annotation={annotation} 
+              geom={selector.geometry} 
+              style={style}/>
+           {:else if (selector?.type === ShapeType.FREEHAND)}
+           <Freehand annotation={annotation} 
+              geom={selector.geometry} 
+              style={style}/>
           {/if}
         {/key}
       {/if}

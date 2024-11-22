@@ -35,14 +35,13 @@
 
       window.onload = function() {
         var anno = createImageAnnotator('sample-image', {
-          adapter: W3CImageFormat('sample-image'),
           autoSave: true,
           style: function(annotation) {
             return annotation.target.selector.type === 'RECTANGLE' ? { fill: 'red' } : { fill: 'blue' };
           }
         });
 
-        anno.loadAnnotations('./annotations.w3c.json');
+        // anno.loadAnnotations('./annotations.w3c.json');
       
         anno.on('createAnnotation', function (annotation) {
           console.log('created', annotation);
@@ -68,7 +67,7 @@
           console.log('leave', annotation);
         });
 
-        anno.setDrawingTool('polygon');
+        anno.setDrawingTool('freehand');
 
         document.addEventListener('keydown', evt => {
           if (evt.key === 'Escape')

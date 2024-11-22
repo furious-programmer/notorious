@@ -10,7 +10,10 @@
   "license": "BSD-3-Clause",
   "scripts": {
     "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "start:annotorious": "cd packages/annotorious && npm run start",
+    "start:core": "cd packages/annotorious-core && npm run start",
+    "start:openseadragon": "cd packages/annotorious-openseadragon && npm run start"
   },
   "workspaces": [
     "./packages/annotorious-core",

@@ -1,5 +1,7 @@
 export * from './polygon';
 export * from './rectangle';
+export * from './line';
+export * from './ellipse';
 export * from './editorsRegistry';
 
 export { default as Editor } from './Editor.svelte';

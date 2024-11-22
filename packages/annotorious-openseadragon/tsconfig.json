@@ -6,6 +6,7 @@
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
     "ignoreDeprecations": "5.0",
     "incremental": false,
     "isolatedModules": true,

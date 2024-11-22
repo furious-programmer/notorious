@@ -1,5 +1,4 @@
-import type { Ellipse, EllipseGeometry, Polygon, PolygonGeometry, Shape } from '../../core';
-import { boundsFromPoints, ShapeType } from '../../core';
+import { boundsFromPoints, ShapeType, type Ellipse, type EllipseGeometry, type Polygon, type PolygonGeometry, type Shape } from '../../core';
 import { insertSVGNamespace, sanitize, SVG_NAMESPACE } from './SVG';
 
 export interface SVGSelector {

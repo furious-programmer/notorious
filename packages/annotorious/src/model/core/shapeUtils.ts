@@ -1,10 +1,16 @@
-import type { Bounds, Shape, ShapeType } from './Shape';
+import { ShapeType, type Bounds, type Shape } from './Shape';
 
 export interface ShapeUtil<T extends Shape> {
 
   area: (shape: T) => number;
 
   intersects: (shape: T, x: number, y: number) => boolean;
+
+  calculatePerpendicularPoints?: (x:number, y:number, angle:number, offset:number) => Array<number>;
+
+  calculateMidpoints?: (points: [number, number][]) => Array<Array<number>>;
+
+  getPathFromPoints?:(points:[number,number][]) => string;
 
 }
 
@@ -55,3 +61,24 @@ export const boundsFromPoints = (points: Array<[number, number]>): Bounds => {
 
   return { minX, minY, maxX, maxY };
 };
+
+export const calculateMidpoints = (shapeType : ShapeType, points: [number, number][]) => {
+  if(Utils[shapeType] && Utils[shapeType].calculateMidpoints){
+    return Utils[shapeType].calculateMidpoints(points);
+  }
+  return [];
+};
+
+export const calculatePerpendicularPoints = (shapeType : ShapeType, x:number, y:number, angle:number, offset:number) => {
+  if(Utils[shapeType] && Utils[shapeType].calculatePerpendicularPoints){
+    return Utils[shapeType].calculatePerpendicularPoints(x, y, angle, offset);
+  }
+  return [];
+};
+
+export const getPathFromPoints = (shapeType: ShapeType, points: [number, number][]) => {
+  if(Utils[shapeType] && Utils[shapeType].getPathFromPoints){
+    return Utils[shapeType].getPathFromPoints(points);
+  }
+  return "";
+}
