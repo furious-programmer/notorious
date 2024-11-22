@@ -3,7 +3,8 @@ export * from './polygon';
 export * from './rectangle';
 export * from './line';
 export * from './polyline';
-export * from './freehand'
+export * from './freehand';
+export * from './circle';
 export * from './ImageAnnotation';
 export * from './Shape';
 export * from './shapeUtils';

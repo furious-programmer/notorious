@@ -6,6 +6,8 @@ import { RubberbandLine } from './line';
 import { RubberbandEllipse } from './ellipse';
 import { RubberbandPolyline } from './polyline';
 import { RubberbandFreehand } from './freehand';
+import { RubberbandCircle } from './circle';
+
 
 export type DrawingTool = 'rectangle' | 'polygon' | string;
 
@@ -24,7 +26,8 @@ const REGISTERED = new Map<DrawingTool, { tool: typeof SvelteComponent, opts?: D
   ['line', {tool: RubberbandLine}],
   ['ellipse', {tool : RubberbandEllipse}],
   ['polyline', {tool : RubberbandPolyline}],
-  ['freehand', {tool : RubberbandFreehand}]
+  ['freehand', {tool : RubberbandFreehand}],
+  ['circle', {tool : RubberbandCircle}]
 ]);
 
 export const listDrawingTools = () => [...REGISTERED.keys()];
