@@ -6,9 +6,8 @@
   import { EditorMount } from '@annotorious/annotorious/src'; // Import Svelte components from source
   import { getEditor as _getEditor, getTool, isImageAnnotation, listDrawingTools } from '@annotorious/annotorious';
   import type { ImageAnnotation, Shape, ImageAnnotatorState, DrawingMode } from '@annotorious/annotorious';
-  import OSDLayer from '../OSDLayer.svelte';
   import OSDToolMount from './OSDToolMount.svelte';
-
+  import OSDLayer from '../OSDLayer.svelte';
   /** Props **/
   export let drawingEnabled: boolean;
   export let filter: Filter<ImageAnnotation> | undefined;

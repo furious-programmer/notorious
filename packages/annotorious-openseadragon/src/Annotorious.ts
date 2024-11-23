@@ -23,7 +23,8 @@ import {
   isTouch,
   listDrawingTools,
   registerTool,
-  registerEditor
+  registerEditor,
+  createSvelteImageAnnotatorState
 } from '@annotorious/annotorious';
 import type {
   AnnotoriousOpts, 
@@ -31,10 +32,11 @@ import type {
   DrawingToolOpts, 
   ImageAnnotation, 
   ShapeType, 
+  SVGAnnotationLayerPointerEvent, 
   Theme
 } from '@annotorious/annotorious';
 import type { PixiLayerClickEvent } from './annotation';
-import { PixiLayer, SVGDrawingLayer, SVGPresenceLayer } from './annotation';
+import { PixiLayer, SVGDisplayLayer, SVGDrawingLayer, SVGPresenceLayer } from './annotation';
 import { setTheme as _setTheme } from './themes';
 import { 
   fitBounds as _fitBounds, 
@@ -84,7 +86,7 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
     theme: 'light'
   });
 
-  const state = createImageAnnotatorState<I, E>(opts);
+  const state = createSvelteImageAnnotatorState<I, E>(opts);
 
   const { hover, selection, store } = state;
 
@@ -101,24 +103,33 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
 
   const keyboardCommands = initKeyboardCommands(undoStack, viewer.element);
 
-  const displayLayer = new PixiLayer({
-    target: viewer.element,
-    props: { 
+  const displayLayer = new SVGDisplayLayer({
+    target : viewer.element,
+    props : {
       state, 
-      viewer, 
-      style: opts.style,
-      filter: undefined
+      viewer,
+      style : opts.style,
+      filter : undefined
     }
-  });
+  })
+  // const displayLayer = new PixiLayer({
+  //   target: viewer.element,
+  //   props: { 
+  //     state, 
+  //     viewer, 
+  //     style: opts.style,
+  //     filter: undefined
+  //   }
+  // });
 
-  const presenceLayer = new SVGPresenceLayer({
-    target: viewer.element.querySelector('.openseadragon-canvas')!,
-    props: { 
-      provider: undefined,
-      store,
-      viewer
-    }
-  });
+  // const presenceLayer = new SVGPresenceLayer({
+  //   target: viewer.element.querySelector('.openseadragon-canvas')!,
+  //   props: { 
+  //     provider: undefined,
+  //     store,
+  //     viewer
+  //   }
+  // });
 
   const drawingLayer = new SVGDrawingLayer({
     target: viewer.element.querySelector('.openseadragon-canvas')!,
@@ -133,16 +144,23 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
     }
   });
 
-  displayLayer.$on('click', (evt: CustomEvent<PixiLayerClickEvent>) => {    
-    const { originalEvent, annotation } = evt.detail;
+  // displayLayer.$on('click', (evt: CustomEvent<SVGAnnotationLayerPointerEvent<I>>) => {
+  //   const { originalEvent, annotation } = evt.detail;
+  //   if (annotation)
+  //     selection.userSelect(annotation.id, originalEvent);
+  //   else if (!selection.isEmpty())
+  //     selection.clear();
+  // });
+  // displayLayer.$on('click', (evt: CustomEvent<PixiLayerClickEvent>) => {    
+  //   const { originalEvent, annotation } = evt.detail;
 
-    // Ignore click event if drawing is currently active with mode 'click'
-    const blockEvent = drawingMode === 'click' && drawingEnabled;
-    if (annotation && !blockEvent)
-      selection.userSelect(annotation.id, originalEvent);
-    else if (!selection.isEmpty())
-      selection.clear();
-  });
+  //   // Ignore click event if drawing is currently active with mode 'click'
+  //   const blockEvent = drawingMode === 'click' && drawingEnabled;
+  //   if (annotation && !blockEvent)
+  //     selection.userSelect(annotation.id, originalEvent);
+  //   else if (!selection.isEmpty())
+  //     selection.clear();
+  // });
 
   viewer.element.addEventListener('pointerdown', (event: PointerEvent) => {
     if (hover.current) {
@@ -168,7 +186,7 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
   const destroy = () => {
     // Destroy Svelte layers
     displayLayer.$destroy();
-    presenceLayer.$destroy();
+    // presenceLayer.$destroy();
     drawingLayer.$destroy();
 
     // Other cleanup actions
@@ -217,7 +235,7 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
   }
 
   const setStyle = (style: DrawingStyleExpression<I> | undefined) => {
-    displayLayer.$set({ style: style as DrawingStyleExpression<ImageAnnotation> });
+    //displayLayer.$set({ style: style as DrawingStyleExpression<ImageAnnotation> });
     drawingLayer.$set({ style: style as DrawingStyleExpression<ImageAnnotation> });
   }
 

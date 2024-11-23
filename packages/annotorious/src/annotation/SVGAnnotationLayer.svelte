@@ -6,7 +6,7 @@
   import { isImageAnnotation, ShapeType } from '../model';
   import type { ImageAnnotation, Shape} from '../model';
   import { getEditor as _getEditor, EditorMount } from './editors';
-  import { Ellipse, Line, Polygon, PolyLine, Rectangle, Freehand, Circle} from './shapes';
+  import { EllipseComponent, LineComponent, PolygonComponent, PolyLineComponent, RectangleComponent, FreehandComponent, CircleComponent} from './shapes';
   import { getTool, listDrawingTools, ToolMount } from './tools';
   import { enableResponsive } from './utils';
   import { createSVGTransform } from './Transform';
@@ -155,34 +155,34 @@
         {@const selector = annotation.target.selector}
         {#key annotation.id}
           {#if (selector?.type === ShapeType.ELLIPSE)}
-            <Ellipse 
+            <EllipseComponent 
               annotation={annotation} 
               geom={selector?.geometry} 
               style={style} />
           {:else if (selector?.type === ShapeType.RECTANGLE)}
-            <Rectangle 
+            <RectangleComponent 
               annotation={annotation} 
               geom={selector.geometry} 
               style={style} />
           {:else if (selector?.type === ShapeType.POLYGON)}
-            <Polygon 
+            <PolygonComponent 
               annotation={annotation} 
               geom={selector.geometry} 
               style={style} />
           {:else if (selector?.type === ShapeType.LINE)}
-           <Line annotation={annotation} 
+           <LineComponent annotation={annotation} 
               geom={selector.geometry} 
               style={style}/>
            {:else if (selector?.type === ShapeType.POLYLINE)}
-           <PolyLine annotation={annotation} 
+           <PolyLineComponent annotation={annotation} 
               geom={selector.geometry} 
               style={style}/>
            {:else if (selector?.type === ShapeType.FREEHAND)}
-           <Freehand annotation={annotation} 
+           <FreehandComponent annotation={annotation} 
               geom={selector.geometry} 
               style={style}/>
           {:else if (selector?.type === ShapeType.CIRCLE)}
-            <Circle annotation={annotation} 
+            <CircleComponent annotation={annotation} 
                 geom={selector.geometry} 
                 style={style}/>
           {/if}

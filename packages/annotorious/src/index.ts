@@ -6,6 +6,7 @@ export * from './annotation/tools';
 export * from './Annotorious';
 export * from './AnnotoriousOpts';
 export * from './keyboardCommands';
+export * from './annotation/shapes';
 
 // Essential re-exports from @annotorious/core
 export type {
