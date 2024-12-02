@@ -36,7 +36,7 @@ import type {
   Theme
 } from '@annotorious/annotorious';
 import type { PixiLayerClickEvent } from './annotation';
-import { PixiLayer, SVGDisplayLayer, SVGDrawingLayer, SVGPresenceLayer } from './annotation';
+import { SVGDrawingLayer, SVGDisplayLayer } from './annotation';
 import { setTheme as _setTheme } from './themes';
 import { 
   fitBounds as _fitBounds, 
@@ -45,6 +45,7 @@ import {
 } from './api';
 
 import '@annotorious/annotorious/annotorious.css';
+import type { SvgDisplayLayerClickEvent } from './annotation/svg/display';
 
 export interface OpenSeadragonAnnotator<I extends Annotation = ImageAnnotation, E extends unknown = ImageAnnotation> extends Annotator<I, E> {
 
@@ -112,24 +113,6 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
       filter : undefined
     }
   })
-  // const displayLayer = new PixiLayer({
-  //   target: viewer.element,
-  //   props: { 
-  //     state, 
-  //     viewer, 
-  //     style: opts.style,
-  //     filter: undefined
-  //   }
-  // });
-
-  // const presenceLayer = new SVGPresenceLayer({
-  //   target: viewer.element.querySelector('.openseadragon-canvas')!,
-  //   props: { 
-  //     provider: undefined,
-  //     store,
-  //     viewer
-  //   }
-  // });
 
   const drawingLayer = new SVGDrawingLayer({
     target: viewer.element.querySelector('.openseadragon-canvas')!,
@@ -144,23 +127,17 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
     }
   });
 
-  // displayLayer.$on('click', (evt: CustomEvent<SVGAnnotationLayerPointerEvent<I>>) => {
-  //   const { originalEvent, annotation } = evt.detail;
-  //   if (annotation)
-  //     selection.userSelect(annotation.id, originalEvent);
-  //   else if (!selection.isEmpty())
-  //     selection.clear();
-  // });
-  // displayLayer.$on('click', (evt: CustomEvent<PixiLayerClickEvent>) => {    
-  //   const { originalEvent, annotation } = evt.detail;
 
-  //   // Ignore click event if drawing is currently active with mode 'click'
-  //   const blockEvent = drawingMode === 'click' && drawingEnabled;
-  //   if (annotation && !blockEvent)
-  //     selection.userSelect(annotation.id, originalEvent);
-  //   else if (!selection.isEmpty())
-  //     selection.clear();
-  // });
+  displayLayer.$on('click', (evt: CustomEvent<SvgDisplayLayerClickEvent>) => {    
+    const { originalEvent, annotation } = evt.detail;
+
+    // Ignore click event if drawing is currently active with mode 'click'
+    const blockEvent = drawingMode === 'click' && drawingEnabled;
+    if (annotation && !blockEvent)
+      selection.userSelect(annotation.id, originalEvent);
+    else if (!selection.isEmpty())
+      selection.clear();
+  });
 
   viewer.element.addEventListener('pointerdown', (event: PointerEvent) => {
     if (hover.current) {
@@ -185,8 +162,8 @@ export const createOSDAnnotator = <I extends Annotation = ImageAnnotation, E ext
 
   const destroy = () => {
     // Destroy Svelte layers
-    displayLayer.$destroy();
     // presenceLayer.$destroy();
+    displayLayer.$destroy();
     drawingLayer.$destroy();
 
     // Other cleanup actions

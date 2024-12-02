@@ -1,0 +1,52 @@
+{
+  "name": "@annotorious/comment-popup",
+  "version": "0.1.0",
+  "description": "A simple comment popup editor for Annotorious",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/annotorious-comment-popup.es.js",
+      "require": "./dist/annotorious-comment-popup.js"
+    },
+    "./annotorious-selector-pack.css": "./dist/annotorious-comment-popup.css"
+  },
+  "main": "./dist/annotorious-comment-popup.js",
+  "module": "./dist/annotorious-comment-popup.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/annotorious/annotorious-extensions.git"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/annotorious/annotorious-extensions/issues"
+  },
+  "homepage": "https://annotorious.github.io",
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.1.1",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/node": "^20.14.2",
+    "@types/uuid": "^9.0.8",
+    "svelte": "^4.2.18",
+    "svelte-preprocess": "^6.0.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.3.1",
+    "vite-plugin-dts": "^3.9.1"
+  },
+  "dependencies": {
+    "@annotorious/annotorious": "^3.0.0-rc.29",
+    "@floating-ui/core": "^1.6.2",
+    "svelte-autosize": "^1.1.0",
+    "svelte-floating-ui": "^1.5.8",
+    "uuid": "^10.0.0"
+  }
+}

@@ -1,22 +1,78 @@
 <script lang="ts" generics="I extends Annotation, E extends unknown">
-  import { createEventDispatcher, onMount } from 'svelte';
-  import OpenSeadragon from 'openseadragon';
-  import type { Annotation, DrawingStyleExpression, StoreChangeEvent } from '@annotorious/core';
-  import { isImageAnnotation, type Filter, type ImageAnnotation, type ImageAnnotatorState, type SvelteImageAnnotatorState } from '@annotorious/annotorious';
-  import Shapes from './Shapes.svelte';
-  import OSDLayer from '../OSDLayer.svelte';
+  import type { SvgDisplayLayerClickEvent } from "./SvgDisplayLayerClickEvent";
+  import OpenSeadragon from "openseadragon";
+  import type { DrawingStyleExpression, Filter } from "@annotorious/core";
+  import { createEventDispatcher, onDestroy, onMount } from "svelte";
+  import Shapes from "./Shapes.svelte";
+  import {
+    isImageAnnotation,
+    type Annotation,
+    type ImageAnnotation,
+    type SvelteImageAnnotatorState,
+    type SVGAnnotationLayerPointerEvent,
+  } from "@annotorious/annotorious";
+  import OSDLayer from "../OSDLayer.svelte";
 
-  export let filter: Filter<ImageAnnotation> | undefined;
   export let state: SvelteImageAnnotatorState<I, E>;
-  export let style: DrawingStyleExpression<ImageAnnotation> | undefined;
+  export let style: DrawingStyleExpression<ImageAnnotation> | undefined =
+    undefined;
   export let viewer: OpenSeadragon.Viewer;
-  export let visible = true;
+  export let filter: Filter<ImageAnnotation> | undefined;
 
-  const { store, hover, selection, viewport } = state;
-  const dispatch = createEventDispatcher<{ click: { originalEvent: Event; annotation?: ImageAnnotation } }>();
+  const dispatch = createEventDispatcher<{
+    click: SvgDisplayLayerClickEvent;
+  }>();
+  let displayEl: SVGElement;
+  let lastPress: { x: number; y: number } | undefined;
+  const { store, selection, hover, viewport } = state;
 
-  let canvas: HTMLCanvasElement;
-  let currentViewportBounds: { x: number, y: number, width: number, height: number };
+  const MAX_CLICK_DURATION = 300;
+
+  const onCanvasPress = (evt: OpenSeadragon.CanvasPressEvent) => {
+    const { x, y } = evt.position;
+    lastPress = { x, y };
+  };
+
+  const onCanvasDrag = (evt : OpenSeadragon.CanvasDragEvent) => {
+    const { x, y } = evt.position;
+    const hit = store.getAt(x, y);
+    const isVisibleHit = hit && (!filter || filter(hit));
+    if (isVisibleHit) {
+      displayEl.classList.add('hover');
+
+      if ($hover !== hit.id) {
+        hover.set(hit.id);
+      }
+    } else {
+      displayEl.classList.remove('hover');
+
+      if ($hover) {
+        hover.set(undefined);
+      }
+    }
+  }
+
+  const onCanvasRelease = (evt: OpenSeadragon.CanvasReleaseEvent) => {
+    if (!lastPress) return;
+
+    const originalEvent = evt.originalEvent as PointerEvent;
+
+    const { x, y } = evt.position;
+    const dx = x - lastPress.x;
+    const dy = y - lastPress.y;
+
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < 5) {
+      const { x, y } = getImageXY(evt.position);
+      const annotation = store.getAt(x, y);
+
+      if (annotation) dispatch("click", { originalEvent, annotation });
+      else dispatch("click", { originalEvent });
+    }
+
+    lastPress = undefined;
+  };
 
   const getImageXY = (xy: OpenSeadragon.Point): OpenSeadragon.Point => {
     const offsetXY = new OpenSeadragon.Point(xy.x, xy.y);
@@ -24,58 +80,28 @@
     return viewer.viewport.viewportToImageCoordinates(x, y);
   };
 
-  const updateViewportState = () => {
-    const viewportBounds = viewer.viewport.getBounds();
-    currentViewportBounds = viewer.viewport.viewportToImageRectangle(viewportBounds);
-
-    const { x, y, width, height } = currentViewportBounds;
-    const intersecting = store.getIntersecting(x, y, width, height);
-    viewport.set(intersecting.map(a => a.id));
-  };
-
-  const onStoreChange = () => {
-    if (currentViewportBounds) {
-      const { x, y, width, height } = currentViewportBounds;
-      const intersecting = store.getIntersecting(x, y, width, height);
-      viewport.set(intersecting.map(a => a.id));
-    } else {
-      viewport.set(store.all().map(a => a.id));
-    }
-  };
-
+  // Add the event listeners on mount
   onMount(() => {
-    canvas = document.createElement('canvas');
-    const { offsetWidth, offsetHeight } = viewer.canvas;
-    canvas.width = offsetWidth;
-    canvas.height = offsetHeight;
-    canvas.className = 'a9s-gl-canvas';
-    viewer.element.querySelector('.openseadragon-canvas')?.appendChild(canvas);
+    viewer.element.querySelector(".openseadragon-canvas")?.appendChild(displayEl);
+    // Event handlers
+    viewer.addHandler('canvas-press', onCanvasPress);
+    viewer.addHandler('canvas-release', onCanvasRelease);
+    viewer.addHandler('canvas-drag', onCanvasDrag);
+  });
 
-    const updateCanvasSize = () => {
-      canvas.width = viewer.canvas.offsetWidth;
-      canvas.height = viewer.canvas.offsetHeight;
-    };
-
-    viewer.addHandler('update-viewport', updateViewportState);
-    store.observe(onStoreChange);
-
-    window.addEventListener('resize', updateCanvasSize);
-
-    return () => {
-      viewer.removeHandler('update-viewport', updateViewportState);
-      store.unobserve(onStoreChange);
-      window.removeEventListener('resize', updateCanvasSize);
-      canvas.parentNode?.removeChild(canvas);
-    };
+  onDestroy(() => {
+    viewer.removeHandler('canvas-drag', onCanvasDrag);
+    viewer.removeHandler('canvas-press', onCanvasPress);
+    viewer.removeHandler('canvas-release', onCanvasRelease);
   });
 </script>
 
-<OSDLayer viewer={viewer} let:transform>
-  <svg class="a9s-annotationlayer">
-    <g transform={transform}>
-      {#each $store.filter(a => isImageAnnotation(a)) as annotation (annotation.id)}
+<OSDLayer {viewer} let:transform let:scale>
+  <svg bind:this={displayEl} class="a9s-osd-displaylayer">
+    <g {transform} {scale}>
+      {#each $store.filter((a) => isImageAnnotation(a)) as annotation}
         {#if isImageAnnotation(annotation)}
-          <Shapes annotation={annotation} style={style} />
+          <Shapes {annotation} {style} />
         {/if}
       {/each}
     </g>
@@ -83,10 +109,13 @@
 </OSDLayer>
 
 <style>
-svg {
-  pointer-events: none;
-}
-svg .a9s-annotation {
-  pointer-events: auto;
-}
+  svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    pointer-events: none;
+  }
 </style>

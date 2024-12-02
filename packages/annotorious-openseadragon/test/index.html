@@ -95,7 +95,7 @@
           drawingEnabled: false,
           style: BASE_STYLE
         });
-        anno.setDrawingTool('circle')
+        anno.setDrawingTool('polyline')
         fetch('annotations.json').then((response) => response.json())
           .then(annotations =>
             anno.setAnnotations(annotations));
